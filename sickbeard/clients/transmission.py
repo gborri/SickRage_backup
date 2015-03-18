@@ -63,30 +63,13 @@ class TransmissionAPI(GenericClient):
 
         return self.auth
 
-    def _add_torrent_uri(self, result):
+    def sinlge_episode_enable(self):
 
-        is_not_downloading = False
+        return True
+
+    def manage_single_episode(self, result, is_not_downloading):
+
         transmission_error = False
-
-        if not self._torrent_is_downloading(result):
-
-            arguments = {'filename': result.url,
-                         'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
-                         'download-dir': sickbeard.TORRENT_PATH
-            }
-            post_data = json.dumps({'arguments': arguments,
-                                    'method': 'torrent-add',
-            })
-            self._request(method='post', data=post_data)
-
-            if not self.response.json()['result'] == "success":
-                self.remove_torrent_downloaded(result.hash)
-                transmission_error = True
-                return False
-
-            is_not_downloading = True
-
-
         file_list = self._get_file_list_in_torrent(result)
 
         if not file_list:
@@ -97,33 +80,34 @@ class TransmissionAPI(GenericClient):
         wantedFile = []
         unwantedFile =[]
 
-        for epObj in result.episodes:
-            index = 0
-            for name_file in file_list['arguments']['torrents'][0]['files']:
-                try:
-                    if '/' in name_file["name"]:
-                        name_file["name"] = name_file["name"].split('/')[1]
-                    myParser = NameParser(showObj=result.show, convert=True)
-                    parse_result = myParser.parse(name_file["name"])
-                except InvalidNameException:
-                    logger.log(u"Unable to parse the filename " + str(name_file["name"]) + " into a valid episode", logger.DEBUG)
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
-                except InvalidShowException:
-                    logger.log(u"Unable to parse the filename " + str(name_file["name"]) + " into a valid show", logger.DEBUG)
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
+        index = 0
+        for name_file in file_list['arguments']['torrents'][0]['files']:
+            try:
+                if '/' in name_file["name"]:
+                    name_file["name"] = name_file["name"].split('/')[1]
+                myParser = NameParser(showObj=result.show, convert=True)
+                parse_result = myParser.parse(name_file["name"])
+            except InvalidNameException:
+                logger.log(u"Unable to parse the filename " + str(name_file["name"]) + " into a valid episode", logger.DEBUG)
+                return True
+            except InvalidShowException:
+                logger.log(u"Unable to parse the filename " + str(name_file["name"]) + " into a valid show", logger.DEBUG)
+                return True 
 
-                if not parse_result or not parse_result.series_name:
-                    continue
+            if not parse_result or not parse_result.series_name:
+                continue
 
-		if epObj.episode in parse_result.episode_numbers and epObj.season == parse_result.season_number:
+            wanted = False
+            for epObj in result.episodes:
+                if epObj.episode in parse_result.episode_numbers and epObj.season == parse_result.season_number:
                     wantedFile.append(index)
-                else:
-                    unwantedFile.append(index)
-                index += 1
+                    wanted = True
+                    break
+
+            if not wanted:
+                unwantedFile.append(index)
+
+            index += 1
 
         if is_not_downloading:
 
@@ -131,30 +115,27 @@ class TransmissionAPI(GenericClient):
                 arguments = {'ids': [result.hash],
                              'files-unwanted': unwantedFile
                 }
-                post_data = json.dumps({'arguments': arguments,
-                            'method': 'torrent-set',
-                })
-                self._request(method='post', data=post_data)
-
-                if not self.response.json()['result'] == "success":
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
         else:
 
             if wantedFile:
                 arguments = {'ids': [result.hash],
                              'files-wanted': wantedFile
                 }
-                post_data = json.dumps({'arguments': arguments,
-                            'method': 'torrent-set',
-                })
-                self._request(method='post', data=post_data)
 
-                if not self.response.json()['result'] == "success":
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
+        if len(arguments):
+            post_data = json.dumps({'arguments': arguments,
+                        'method': 'torrent-set',
+            })
+            self._request(method='post', data=post_data)
+
+            if not self.response.json()['result'] == "success":
+                self.remove_torrent_downloaded(result.hash)
+                transmission_error = True
+                return False
+        else:
+            self.remove_torrent_downloaded(result.hash)
+            transmission_error = True
+            return False
 
         if transmission_error:
 
@@ -171,6 +152,30 @@ class TransmissionAPI(GenericClient):
 
             if not self.response.json()['result'] == "success":
                 return False
+
+        return True
+
+    def _add_torrent_uri(self, result):
+
+        is_not_downloading = False
+
+        if not self._torrent_is_downloading(result):
+
+            arguments = {'filename': result.url,
+                         'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
+                         'download-dir': sickbeard.TORRENT_PATH
+            }
+            post_data = json.dumps({'arguments': arguments,
+                                    'method': 'torrent-add',
+            })
+            self._request(method='post', data=post_data)
+
+            if not self.response.json()['result'] == "success":
+                return False
+
+            is_not_downloading = True
+
+        self.manage_single_episode(result, is_not_downloading)
 
         return True
 
@@ -205,81 +210,11 @@ class TransmissionAPI(GenericClient):
             self._request(method='post', data=post_data)
 
             if not self.response.json()['result'] == "success":
-                self.remove_torrent_downloaded(result.hash)
-                transmission_error = True
                 return False
 
             is_not_downloading = True
 
-
-        file_list = self._get_file_list_in_torrent(result)
-
-        if not file_list:
-            self.remove_torrent_downloaded(result.hash)
-            transmission_error = True
-            return False
-
-        wantedFile = []
-        unwantedFile =[]
-
-        for epObj in result.episodes:
-            index = 0
-            for name_file in file_list['arguments']['torrents'][0]['files']:
-                try:
-                    if '/' in name_file["name"]:
-                        name_file["name"] = name_file["name"].split('/')[1]
-                    myParser = NameParser(showObj=result.show, convert=True)
-                    parse_result = myParser.parse(name_file["name"])
-                except InvalidNameException:
-                    logger.log(u"Unable to parse the filename " + str(name_file["name"]) + " into a valid episode", logger.DEBUG)
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
-                except InvalidShowException:
-                    logger.log(u"Unable to parse the filename " + str(name_file["name"]) + " into a valid show", logger.DEBUG)
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
-
-                if not parse_result or not parse_result.series_name:
-                    continue
-
-		if epObj.episode in parse_result.episode_numbers and epObj.season == parse_result.season_number:
-                    wantedFile.append(index)
-                else:
-                    unwantedFile.append(index)
-                index += 1
-
-        if is_not_downloading:
-
-            if unwantedFile:
-                arguments = {'ids': [result.hash],
-                             'files-unwanted': unwantedFile
-                }
-                post_data = json.dumps({'arguments': arguments,
-                            'method': 'torrent-set',
-                })
-                self._request(method='post', data=post_data)
-
-                if not self.response.json()['result'] == "success":
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
-        else:
-
-            if wantedFile:
-                arguments = {'ids': [result.hash],
-                             'files-wanted': wantedFile
-                }
-                post_data = json.dumps({'arguments': arguments,
-                            'method': 'torrent-set',
-                })
-                self._request(method='post', data=post_data)
-
-                if not self.response.json()['result'] == "success":
-                    self.remove_torrent_downloaded(result.hash)
-                    transmission_error = True
-                    return False
+        self.manage_single_episode(result, is_not_downloading)
 
         return True
 

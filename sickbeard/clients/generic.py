@@ -85,6 +85,17 @@ class GenericClient(object):
         """
         return None
 
+    def sinlge_episode_enable(self):
+        """
+        This should be overridden and should return True if single episode download form multiepisode torrent is enabled
+        """
+
+        return False
+
+    def manage_single_episode(self, result, is_not_downloading):
+
+        return True
+
     def _add_torrent_uri(self, result):
         """
         This should be overridden should return the True/False from the client
