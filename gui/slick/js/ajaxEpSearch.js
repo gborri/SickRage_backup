@@ -5,29 +5,32 @@ $.fn.manualSearches = [];
 
 function check_manual_searches() {
     var poll_interval = 5000;
-    $.ajax({
-        url: search_status_url + '?show=' + $('#showID').val(),
-        success: function (data) {
-            if (data.episodes) {
-            	poll_interval = 5000;
-            }
-            else {
-            	poll_interval = 15000;
-            }
-        	
-            updateImages(data);
-            //cleanupManualSearches(data);
-        },
-        error: function () {
-            poll_interval = 30000;
-        },
-        type: "GET",
-        dataType: "json",
-        complete: function () {
-            setTimeout(check_manual_searches, poll_interval);
-        },
-        timeout: 15000 // timeout every 15 secs
-    });
+    showId = $('#showID').val()
+    if ( showId !== undefined) {
+        $.ajax({
+            url: search_status_url + '?show=' + showId,
+            success: function (data) {
+                if (data.episodes) {
+                	poll_interval = 5000;
+                }
+                else {
+                	poll_interval = 15000;
+                }
+            	
+                updateImages(data);
+                //cleanupManualSearches(data);
+            },
+            error: function () {
+                poll_interval = 30000;
+            },
+            type: "GET",
+            dataType: "json",
+            complete: function () {
+                setTimeout(check_manual_searches, poll_interval);
+            },
+            timeout: 15000 // timeout every 15 secs
+        });
+    }
 }
 
 
