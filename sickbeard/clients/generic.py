@@ -86,12 +86,30 @@ class GenericClient(object):
         """
         return None
 
+    def sinlge_episode_enable(self):
+        """
+        This should be overridden and should return True if single episode download form multiepisode torrent is enabled
+        """
+
+        return False
+
+    def manage_single_episode(self, result, is_not_downloading):
+
+        return True
+
     def _add_torrent_uri(self, result):
         """
         This should be overridden should return the True/False from the client
         when a torrent is added via url (magnet or .torrent link)
         """
         return False
+
+    def _get_file_list_in_torrent (self, result):
+        """
+        This should be overridden should return the True/False from the client
+        when a torrent is added via url (magnet or .torrent link)
+        """
+        return []
 
     def _add_torrent_file(self, result):
         """
@@ -150,8 +168,10 @@ class GenericClient(object):
                 result.hash = b16encode(b32decode(result.hash)).lower()
         else:
             if not result.content:
-                logger.log('Torrent without content', logger.ERROR)
-                raise Exception('Torrent without content')
+                logger.log('Torrent without content, try to geti it', logger.ERROR)
+                result.content = result.provider.getURL(result.url)
+                if not result.content:
+                    raise Exception('Torrent without content')
 
             try:
                 torrent_bdecode = bdecode(result.content)
@@ -167,6 +187,20 @@ class GenericClient(object):
             result.hash = sha1(bencode(info)).hexdigest()
 
         return result
+
+    def _torrent_is_downloading(self, result):
+        """
+        This should be overridden should return the True/False from the client
+        when a torrent is set with pause
+        """
+        return False
+
+    def remove_torrent_downloaded(self,hash):
+        """
+        This should be overridden should return the True/False from the client
+        when a torrent is set with pause
+        """
+        return True
 
     def sendTORRENT(self, result):
 

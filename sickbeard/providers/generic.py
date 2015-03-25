@@ -277,13 +277,13 @@ class GenericProvider:
                 continue
 
             # skip if season already searched
-            if len(episodes) > 1 and searched_scene_season == epObj.scene_season:
+            if len(episodes) > 1 and searched_scene_season == epObj.scene_season and not(episodes and sickbeard.TORRENT_METHOD == 'transmission'):
                 continue
 
             # mark season searched for season pack searches so we can skip later on
             searched_scene_season = epObj.scene_season
 
-            if len(episodes) > 1:
+            if search_mode == 'sponly':
                 # get season search results
                 for curString in self._get_season_search_strings(epObj):
                     itemList += self._doSearch(curString, search_mode, len(episodes))
@@ -337,7 +337,7 @@ class GenericProvider:
             addCacheEntry = False
             if not (showObj.air_by_date or showObj.sports):
                 if search_mode == 'sponly': 
-                    if len(parse_result.episode_numbers):
+                    if len(parse_result.episode_numbers) and not (len(episodes) and sickbeard.TORRENT_METHOD == 'transmission'):
                         logger.log(
                             u"This is supposed to be a season pack search but the result " + title + " is not a valid season pack, skipping it",
                             logger.DEBUG)
@@ -401,6 +401,11 @@ class GenericProvider:
 
             # make sure we want the episode
             wantEp = True
+            if len(episodes) and sickbeard.TORRENT_METHOD == 'transmission':
+                actual_episodes = []
+                for ep in episodes:
+                    actual_episodes.append(ep.episode)
+
             for epNo in actual_episodes:
                 if not showObj.wantEpisode(actual_season, epNo, quality, manualSearch, downCurQuality):
                     wantEp = False
@@ -417,9 +422,12 @@ class GenericProvider:
             logger.log(u"Found result " + title + " at " + url, logger.DEBUG)
 
             # make a result object
-            epObj = []
-            for curEp in actual_episodes:
-                epObj.append(showObj.getEpisode(actual_season, curEp))
+            if len(episodes) and sickbeard.TORRENT_METHOD == 'transmission':
+                epObj=episodes
+            else:
+                epObj = []
+                for curEp in actual_episodes:
+                    epObj.append(showObj.getEpisode(actual_season, curEp))
 
             result = self.getResult(epObj)
             result.show = showObj
