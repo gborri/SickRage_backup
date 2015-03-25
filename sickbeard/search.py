@@ -161,6 +161,7 @@ def snatchEpisode(result, endStatus=SNATCHED):
         else:
             if result.content or result.url.startswith('magnet'):
                 client = clients.getClientIstance(sickbeard.TORRENT_METHOD)()
+                result = client._get_torrent_hash(result)
                 dlResult = client.sendTORRENT(result)
             else:
                 logger.log(u"Torrent file content is empty", logger.ERROR)
@@ -455,7 +456,7 @@ def searchForNeededEpisodes():
     return foundResults.values()
 
 
-def searchProviders(show, episodes, manualSearch=False, downCurQuality=False):
+def searchProviders(show, episodes, manualSearch=False):
     foundResults = {}
     finalResults = []
 
@@ -505,7 +506,7 @@ def searchProviders(show, episodes, manualSearch=False, downCurQuality=False):
                 logger.log(u"Performing season pack search for " + show.name)
 
             try:
-                searchResults = curProvider.findSearchResults(show, episodes, search_mode, manualSearch, downCurQuality)
+                searchResults = curProvider.findSearchResults(show, episodes, search_mode, manualSearch)
             except exceptions.AuthException, e:
                 logger.log(u"Authentication error: " + ex(e), logger.ERROR)
                 break
@@ -579,7 +580,7 @@ def searchProviders(show, episodes, manualSearch=False, downCurQuality=False):
             anyWanted = False
             for curEpNum in allEps:
                 for season in set([x.season for x in episodes]):
-                    if not show.wantEpisode(season, curEpNum, seasonQual, downCurQuality):
+                    if not show.wantEpisode(season, curEpNum, seasonQual):
                         allWanted = False
                     else:
                         anyWanted = True

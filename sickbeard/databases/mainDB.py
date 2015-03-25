@@ -27,7 +27,7 @@ from sickbeard import encodingKludge as ek
 from sickbeard.name_parser.parser import NameParser, InvalidNameException, InvalidShowException
 
 MIN_DB_VERSION = 9  # oldest db version we support migrating from
-MAX_DB_VERSION = 42
+MAX_DB_VERSION = 43
 
 class MainSanityCheck(db.DBSanityCheck):
     def check(self):
@@ -1006,3 +1006,18 @@ class MigrateSickBeardDB(AlterTVShowsFieldTypes):
         self.connection.action("update tv_episodes set status = 5 where status = 12")
 
         self.connection.action("UPDATE db_version SET db_version = 42")
+
+class AddTorrentHash(AlterTVShowsFieldTypes):
+    """ Adding column torrent_hash to tv_episodes for removing torrent instance after donwloading it """
+
+    def test(self):
+        return self.checkDBVersion() >= 43
+
+    def execute(self):
+        backupDatabase(self.checkDBVersion())
+
+        logger.log(u"Adding column torrent_hash in tv_episodes")
+        if not self.hasColumn("tv_episodes", "torrent_hash"):
+            self.addColumn("tv_episodes", "torrent_hash", 'TEXT', None)
+
+        self.incDBVersion()
