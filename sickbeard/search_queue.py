@@ -143,7 +143,7 @@ class DailySearchQueueItem(generic_queue.QueueItem):
             else:
                 for result in foundResults:
                     #snatch episode
-                    if sickbeard.AVAILABLE_CHECK:
+                    if sickbeard.EP_AVAILABILITY_CHECK:
                         snatch_result = deepcopy(result)
                         epObjList = []
                         for epObj in snatch_result.episodes:
@@ -250,7 +250,7 @@ class BacklogQueueItem(generic_queue.QueueItem):
             if searchResult:
                 for result in searchResult:
 
-                    if sickbeard.AVAILABLE_CHECK:
+                    if sickbeard.EP_AVAILABILITY_CHECK:
                         #snatch episode
                         snatch_result = deepcopy(result)
                         epObjList = []
@@ -262,7 +262,6 @@ class BacklogQueueItem(generic_queue.QueueItem):
 
                         # just use the first result for now
                         if len(epObjList):
-                            logger.log(u"Downloading " + snatch_result.name + " from " + snatch_result.provider.name)
                             search.snatchEpisode(snatch_result)
 
                         #make episode status to available
@@ -274,7 +273,6 @@ class BacklogQueueItem(generic_queue.QueueItem):
                         available_result.episodes = epObjList
 
                         if len(available_result.episodes):
-                            logger.log(u"Marking " + available_result.name + " from " + available_result.provider.name + "as available")
                             search.markAvailable(available_result)
                     else:
                         logger.log(u"Downloading " + result.name + " from " + result.provider.name)
