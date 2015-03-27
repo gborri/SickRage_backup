@@ -277,7 +277,7 @@ class GenericProvider:
                 continue
 
             # skip if season already searched
-            if len(episodes) > 1 and searched_scene_season == epObj.scene_season and not(episodes and sickbeard.TORRENT_METHOD == 'transmission'):
+            if search_mode == 'sponly' and searched_scene_season == epObj.scene_season:
                 continue
 
             # mark season searched for season pack searches so we can skip later on
