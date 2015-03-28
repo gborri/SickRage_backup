@@ -29,7 +29,7 @@ from sickbeard import helpers
 from sickbeard import search_queue
 from sickbeard import db
 from sickbeard import notifiers
-from sickbeard.common import SNATCHED, SNATCHED_PROPER, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN, FAILED
+from sickbeard.common import SNATCHED, SNATCHED_PROPER, AVAILABLE, DOWNLOADED, SKIPPED, UNAIRED, IGNORED, ARCHIVED, WANTED, UNKNOWN, FAILED
 from common import Quality, qualityPresetStrings, statusStrings
 from lib.trakt import *
 from trakt.exceptions import traktException
@@ -463,7 +463,7 @@ class TraktRolling():
 
         myDB = db.DBConnection()
 
-        sql_selection="SELECT indexer, indexer_id, imdb_id, show_name, season, episode, paused FROM (SELECT * FROM tv_shows s,tv_episodes e WHERE s.indexer_id = e.showid) T1 WHERE T1.episode_id IN (SELECT T2.episode_id FROM tv_episodes T2 WHERE T2.showid = T1.indexer_id and T2.status in (?) and T2.season!=0 and airdate is not null ORDER BY T2.season,T2.episode LIMIT 1)"
+        sql_selection="SELECT indexer, indexer_id, imdb_id, show_name, season, episode, paused FROM (SELECT * FROM tv_shows s,tv_episodes e WHERE s.indexer_id = e.showid) T1 WHERE T1.episode_id IN (SELECT T2.episode_id FROM tv_episodes T2 WHERE T2.showid = T1.indexer_id and T2.status in (?,?) and T2.season!=0 and airdate is not null ORDER BY T2.season,T2.episode LIMIT 1)"
 
         if indexer_id is not None:
             sql_selection=sql_selection + " and indexer_id = " + str(indexer_id)
@@ -472,7 +472,7 @@ class TraktRolling():
 
 	    sql_selection=sql_selection + " ORDER BY T1.show_name,season,episode"
 
-        results = myDB.select(sql_selection,[SKIPPED])
+        results = myDB.select(sql_selection,[SKIPPED, AVAILABLE])
 
         for cur_result in results:
 
