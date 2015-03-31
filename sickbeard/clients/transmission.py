@@ -73,9 +73,7 @@ class TransmissionAPI(GenericClient):
         file_list = self._get_file_list_in_torrent(result)
 
         if not file_list:
-            self.remove_torrent_downloaded(result.hash)
-            transmission_error = True
-            return False
+            self._manage_trasmission_error(result)
 
         wantedFile = []
         unwantedFile =[]
@@ -109,6 +107,8 @@ class TransmissionAPI(GenericClient):
 
             index += 1
 
+        arguments = {}
+
         if is_not_downloading:
 
             if unwantedFile:
@@ -129,31 +129,27 @@ class TransmissionAPI(GenericClient):
             self._request(method='post', data=post_data)
 
             if not self.response.json()['result'] == "success":
-                self.remove_torrent_downloaded(result.hash)
-                transmission_error = True
-                return False
+                self._manage_trasmission_error(result)
         else:
-            self.remove_torrent_downloaded(result.hash)
-            transmission_error = True
-            return False
-
-        if transmission_error:
-
-            self.remove_torrent_downloaded(result.hash)
-
-            arguments = {'filename': result.url,
-                         'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
-                         'download-dir': sickbeard.TORRENT_PATH
-            }
-            post_data = json.dumps({'arguments': arguments,
-                                    'method': 'torrent-add',
-            })
-            self._request(method='post', data=post_data)
-
-            if not self.response.json()['result'] == "success":
-                return False
+            self._manage_trasmission_error(result)
 
         return True
+
+    def _manage_trasmission_error(self, result):
+
+        self.remove_torrent_downloaded(result.hash)
+
+        arguments = {'filename': result.url,
+                     'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
+                     'download-dir': sickbeard.TORRENT_PATH
+        }
+        post_data = json.dumps({'arguments': arguments,
+                                'method': 'torrent-add',
+        })
+        self._request(method='post', data=post_data)
+
+        if not self.response.json()['result'] == "success":
+            return False
 
     def _add_torrent_uri(self, result):
 
@@ -296,10 +292,8 @@ class TransmissionAPI(GenericClient):
         self._request(method='post', data=post_data)
 
         if self.response.json()['result'] == "success" and self.response.json()['arguments']['torrents']:
-            logger.log(u"torrent found, result" + str(self.response.json()), logger.DEBUG)
             return True
         else:
-            logger.log(u"torrent not found, result" + str(self.response.json()), logger.DEBUG)
             return False
 
     def remove_torrent_downloaded(self,hash):
