@@ -168,7 +168,7 @@ class GenericClient(object):
                 result.hash = b16encode(b32decode(result.hash)).lower()
         else:
             if not result.content:
-                logger.log('Torrent without content, try to geti it', logger.ERROR)
+                logger.log('Torrent without content, try to get it', logger.ERROR)
                 result.content = result.provider.getURL(result.url)
                 if not result.content:
                     raise Exception('Torrent without content')

@@ -1045,8 +1045,6 @@ def initialize(consoleLogging=True):
         TRAKT_ROLLING_NUM_EP = check_setting_int(CFG, 'Trakt', 'trakt_rolling_num_ep', 0)
         TRAKT_ROLLING_ADD_PAUSED = check_setting_int(CFG, 'Trakt', 'trakt_rolling_add_paused', 1)
         TRAKT_ROLLING_FREQUENCY = check_setting_int(CFG, 'Trakt', 'trakt_rolling_frequency', 8)
-        if TRAKT_ROLLING_FREQUENCY < 4:
-            TRAKT_ROLLING_FREQUENCY = 4
 
         CheckSection(CFG, 'pyTivo')
         USE_PYTIVO = bool(check_setting_int(CFG, 'pyTivo', 'use_pytivo', 0))
@@ -1374,7 +1372,7 @@ def initialize(consoleLogging=True):
                                                     silent=not USE_TRAKT)
 
         traktRollingScheduler = scheduler.Scheduler(traktChecker.TraktRolling(),
-                                                    cycleTime=datetime.timedelta(hours=TRAKT_ROLLING_FREQUENCY),
+                                                    cycleTime=datetime.timedelta(minutes=TRAKT_ROLLING_FREQUENCY),
                                                     threadName="TRAKTROLLING",
                                                     silent=not TRAKT_USE_ROLLING_DOWNLOAD)
 
