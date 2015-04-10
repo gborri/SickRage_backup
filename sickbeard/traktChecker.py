@@ -69,9 +69,6 @@ class TraktChecker():
         self.EpisodeWatchlist = []
 
     def run(self, force=False):
-        if not sickbeard.USE_TRAKT:
-            logger.log(u"Trakt integration disabled, quit", logger.DEBUG)
-            return
 
         # add shows from trakt.tv watchlist
         if sickbeard.TRAKT_SYNC_WATCHLIST:
@@ -391,14 +388,18 @@ class TraktChecker():
         else:
             watchlist = self.ShowWatchlist
 
+        trakt_id = sickbeard.indexerApi(show_obj.indexer).config['trakt_id']
+        
         for watchlist_el in watchlist:
 
-            trakt_id = sickbeard.indexerApi(show_obj.indexer).config['trakt_id']
             if trakt_id == 'tvdb_id':
                 indexer_id = int(watchlist_el['show']['ids']["tvdb"])
             else:
-                indexer_id = int(watchlist_el['show']['ids']["tvrage"])
-
+                if not watchlist_el['show']['ids']["tvrage"] is None:
+                   indexer_id = int(watchlist_el['show']['ids']["tvrage"])
+                else:
+                    indexer_id = 0
+                    
             if indexer_id == show_obj.indexerid and season is None and episode is None:
                 found=True
                 break
@@ -415,9 +416,6 @@ class TraktRolling():
         self.EpisodeWatched = []
 
     def run(self, force=False):
-        if not (sickbeard.TRAKT_USE_ROLLING_DOWNLOAD and sickbeard.USE_TRAKT):
-            return
-
         logger.log(u"Start getting list from Traktv", logger.DEBUG)
 
         logger.log(u"Getting EpisodeWatched", logger.DEBUG)
@@ -438,13 +436,13 @@ class TraktRolling():
 
     def refreshEpisodeWatched(self):
 
-       if not (sickbeard.TRAKT_USE_ROLLING_DOWNLOAD and sickbeard.USE_TRAKT):
-           return False
+        if not (sickbeard.TRAKT_USE_ROLLING_DOWNLOAD and sickbeard.USE_TRAKT):
+            return False
 
-       if not self._getEpisodeWatched():
-           return False
+        if not self._getEpisodeWatched():
+            return False
 
-       return True
+        return True
 
     def updateWantedList(self, indexer_id = None):
 
@@ -470,7 +468,7 @@ class TraktRolling():
         else:
             sql_selection=sql_selection + " and T1.paused = 0"
 
-	    sql_selection=sql_selection + " ORDER BY T1.show_name,season,episode"
+        sql_selection=sql_selection + " ORDER BY T1.show_name,season,episode"
 
         results = myDB.select(sql_selection)
 
@@ -580,4 +578,3 @@ class TraktRolling():
                 continue
 
         return num_ep
-
