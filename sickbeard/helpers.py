@@ -923,6 +923,13 @@ def encrypt(data, encryption_version=0, decrypt=False):
         else:
             return base64.encodestring(
                 ''.join(chr(ord(x) ^ ord(y)) for (x, y) in izip(data, cycle(unique_key1)))).strip()
+    # Version 2: Simple XOR encryption (this is not very secure, but works)
+    elif encryption_version == 2:
+        if decrypt:
+            return ''.join(chr(ord(x) ^ ord(y)) for (x, y) in izip(base64.decodestring(data), cycle(sickbeard.ENCRYPTION_SECRET)))
+        else:
+            return base64.encodestring(
+                ''.join(chr(ord(x) ^ ord(y)) for (x, y) in izip(data, cycle(sickbeard.ENCRYPTION_SECRET)))).strip()
     # Version 0: Plain text
     else:
         return data
@@ -1301,7 +1308,18 @@ def getURL(url, post_data=None, params=None, headers={}, timeout=30, session=Non
         logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
         return
 
-    return resp.content if not json else resp.json()
+    if not json:
+        try:
+            resp.content
+        except Exception as e:
+            logger.log(u"Unable to return content for " + url + ": " + traceback.format_exc(), logger.WARNING)
+            return
+    else:
+        try:
+            resp.json()
+        except Exception as e:
+            logger.log(u"Unable to decode json data for  " + url + ": " + traceback.format_exc(), logger.WARNING)
+            return {}
 
 def download_file(url, filename, session=None):
     # create session
@@ -1480,7 +1498,7 @@ def verify_freespace(src, dest, oldfile=None):
         def disk_usage(path):
             _, total, free = ctypes.c_ulonglong(), ctypes.c_ulonglong(), \
                                ctypes.c_ulonglong()
-            if sys.version_info >= (3,):
+            if sys.version_info >= (3,) or isinstance(path, unicode):
                 fun = ctypes.windll.kernel32.GetDiskFreeSpaceExW
             else:
                 fun = ctypes.windll.kernel32.GetDiskFreeSpaceExA
@@ -1507,10 +1525,27 @@ def verify_freespace(src, dest, oldfile=None):
     
     if oldfile:
         for file in oldfile:
-            neededspace -= ek.ek(os.path.getsize, file.location)
+            if ek.ek(os.path.isfile, file.location):
+                diskfree += ek.ek(os.path.getsize, file.location)
         
     if diskfree > neededspace:
         return True
     else:
         logger.log("Not enough free space: Needed: " + str(neededspace) + " bytes (" + pretty_filesize(neededspace) + "), found: " + str(diskfree) + " bytes (" + pretty_filesize(diskfree) + ")", logger.WARNING)
-        return False  
+        return False
+
+# https://gist.github.com/thatalextaylor/7408395
+def pretty_time_delta(seconds):
+    sign_string = '-' if seconds < 0 else ''
+    seconds = abs(int(seconds))
+    days, seconds = divmod(seconds, 86400)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    if days > 0:
+        return '%s%dd%02dh%02dm%02ds' % (sign_string, days, hours, minutes, seconds)
+    elif hours > 0:
+        return '%s%02dh%02dm%02ds' % (sign_string, hours, minutes, seconds)
+    elif minutes > 0:
+        return '%s%02dm%02ds' % (sign_string, minutes, seconds)
+    else:
+        return '%s%02ds' % (sign_string, seconds)

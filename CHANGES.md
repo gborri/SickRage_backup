@@ -1,4 +1,60 @@
-### 4.0.13 (2014-03-22)
+### 4.0.15 (2015-04-05)
+
+[full changelog](https://github.com/SiCKRAGETV/SickRage/compare/v4.0.14...v4.0.15)
+
+* Fixed KAT season search
+* Fixed episode description decode error in calendar
+* Fixed torrent empty in multi-episode
+* Fixed XEM invalid entries
+* Fixed unicode error in verify_freespace
+* Fixed rtorrent encoding issue in windows
+* Fixed "add shows" with white spaces
+* Fixed frequency definition in start queue
+* Fixed EZTV import error
+* Added qbittorrent sync file extention to ignore list
+* Added T411 API - instead of web scrapping
+* Added RARBG API - instead of web scrapping
+* Added option to choose removed episodes status
+* Added removeWordsList from all providers - clean release names if provider add more text to it
+* Added more network logos
+* Added check in manual postprocess to remove hard/sym links in windows
+* Added code to debug scheduler errors
+* Updated TRAKT api urls
+* Relocated coming_eps_missed_range to general settings
+
+### 4.0.14 (2015-03-29)
+
+[full changelog](https://github.com/SiCKRAGETV/SickRage/compare/v4.0.13...v4.0.14)
+
+* Feature: Added Free Space check in PP before deleting files
+* Added DEBUG setting to UI
+* Added better note to Extra Scripts setting in PP
+* Added more network logs
+* Added anime regex for 003-004. Show Name - Ep Name.ext
+* Added Quality check even if SR itself downloaded the episode
+* Added Default Info Language in general settings 
+* Fixed password encryption when restoring backup to another computer
+* Fixed T411 torrent name with special chars
+* Fixed PP when higher quality have lower size making SR re-download multiple times
+* Fixed Trakt exceptions
+* Fixed debug and db events in log when debug log is disabled
+* Fixed showupdater when user changed updater hour and thread didn't restart
+* Fixed inc_top.tmpl loading unnecessary stuff when not logged 
+* Fixed gitignore issue with relative folder
+* Fixed Add show with improperly decoded utf-8 characters
+* Fixed PP episodes with Airdate. Check without season 0 first
+* Fixed don't display prev and next airs if date is invalid
+* Fixed verify_freespace to check show location and check old file exists
+* Fixed tntvillage provider (cosmetic)
+* Fixed active status on home accordingly to manage rolling download enable/disable
+* Fixed trending blacklist management
+* Fixed Hounddawgs (various fixes)
+* Fixed Torrent file content is empty on magnet torrent
+* Fixed search show name in Home
+* Hide Proxy indexers settings when proxy host is empty
+* Change removed episodes status from IGNORED to ARCHIVED 
+
+### 4.0.13 (2015-03-22)
 
 [full changelog](https://github.com/SiCKRAGETV/SickRage/compare/v4.0.12...v4.0.13)
 
@@ -53,7 +109,7 @@
 * New Feature: Added the ability to choose displaying columns in home page
 
 
-### 4.0.12 (2014-03-15)
+### 4.0.12 (2015-03-15)
 
 [full changelog](https://github.com/SiCKRAGETV/SickRage/compare/v4.0.11...v4.0.12)
 
@@ -86,7 +142,7 @@
 * Added limit title length when Submitting log
 * Send LOCALE when submitting issue
 
-### 4.0.11 (2014-03-08)
+### 4.0.11 (2015-03-08)
 [full changelog](https://github.com/SiCKRAGETV/SickRage/compare/v4.0.10...v4.0.11)
 
 * Use Scene Exceptions in Post Processing
@@ -106,7 +162,7 @@
 * If you missed this feature: you can change the number of logs in settings and size per file)
 * WARNING: Windows users: please set number of logs to 0 (zero) to avoid errors. Known issue.
 
-### 4.0.10 (2014-03-03)
+### 4.0.10 (2015-03-03)
 [full changelog](https://github.com/SiCKRAGETV/SickRage/compare/v4.0.9...v4.0.10)
 
 * Add "Use failed downloads" to search settings
