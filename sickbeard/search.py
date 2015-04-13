@@ -501,6 +501,8 @@ def searchProviders(show, episodes, manualSearch=False, downCurQuality=False):
                 break
             elif not curProvider.search_fallback or searchCount == 2:
                 break
+            elif search_mode == 'sponly' and searchCount == 1:
+                break
 
             if search_mode == 'sponly':
                 logger.log(u"FALLBACK EPISODE SEARCH INITIATED ...")
