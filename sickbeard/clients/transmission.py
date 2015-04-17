@@ -178,11 +178,10 @@ class TransmissionAPI(GenericClient):
  
         if is_not_downloading and not sickbeard.TORRENT_PAUSED:
 
-            arguments = {'ids': [result.hash],
-                         'paused': 0
+            arguments = {'ids': [result.hash]
             }
             post_data = json.dumps({'arguments': arguments,
-                                    'method': 'torrent-set',
+                                    'method': 'torrent-start-now',
             })
             self._request(method='post', data=post_data)
 
@@ -230,11 +229,10 @@ class TransmissionAPI(GenericClient):
 
         if is_not_downloading and not sickbeard.TORRENT_PAUSED:
         
-            arguments = {'ids': [result.hash],
-                         'paused': 0 
+            arguments = {'ids': [result.hash]
             }
             post_data = json.dumps({'arguments': arguments,
-                                    'method': 'torrent-set',
+                                    'method': 'torrent-start-now',
             })
             self._request(method='post', data=post_data)
 
