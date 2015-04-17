@@ -1554,7 +1554,7 @@ class Home(WebRoot):
         if not paused and (sickbeard.TRAKT_USE_ROLLING_DOWNLOAD and sickbeard.USE_TRAKT):
             # Checking if trakt and rolling_download are enable because updateWantedList()
             # doesn't do the distinction between a failuire and being not activated(Return false)
-            if not sickbeard.traktRollingScheduler.action.updateWantedList():
+            if not sickbeard.traktRollingScheduler.action.updateWantedList(showObj.indexerid):
                 errors.append("Unable to force an update on wanted episode")
 
         if do_available_search and sickbeard.EP_AVAILABILITY_CHECK:
@@ -1596,6 +1596,12 @@ class Home(WebRoot):
             showObj.paused = 1
 
         showObj.saveToDB()
+
+        if not showObj.paused and sickbeard.TRAKT_USE_ROLLING_DOWNLOAD and sickbeard.USE_TRAKT:
+            # Checking if trakt and rolling_download are enable because updateWantedList()
+            # doesn't do the distinction between a failuire and being not activated(Return false)
+            if not sickbeard.traktRollingScheduler.action.updateWantedList(showObj.indexerid):
+                errors.append("Unable to force an update on wanted episode")
 
         ui.notifications.message('<b>%s</b> has been %s' % (showObj.name,('resumed', 'paused')[showObj.paused]))
         return self.redirect("/home/displayShow?show=" + show)
@@ -1996,7 +2002,7 @@ class Home(WebRoot):
             results = []
             showObj = sickbeard.helpers.findCertainShow(sickbeard.showList, int(searchThread.show.indexerid))
             
-            if not ShowObj:
+            if not showObj:
                 logger.log('No Show Object found for show with indexerID: ' + searchThread.show.indexerid, logger.ERROR)
                 return results
             
