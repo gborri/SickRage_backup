@@ -158,7 +158,7 @@ class TransmissionAPI(GenericClient):
         if not self._torrent_is_downloading(result):
 
             arguments = {'filename': result.url,
-                         'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
+                         'paused': 1,
                          'download-dir': sickbeard.TORRENT_PATH
             }
             post_data = json.dumps({'arguments': arguments,
@@ -172,6 +172,19 @@ class TransmissionAPI(GenericClient):
             is_not_downloading = True
 
         self.manage_single_episode(result, is_not_downloading)
+
+        if is_not_downloading and not sickbeard.TORRENT_PAUSED:
+
+            arguments = {'ids': [result.hash],
+                         'paused': 0
+            }
+            post_data = json.dumps({'arguments': arguments,
+                                    'method': 'torrent-set',
+            })
+            self._request(method='post', data=post_data)
+
+            if not self.response.json()['result'] == "success":
+                return False
 
         return True
 
@@ -197,7 +210,7 @@ class TransmissionAPI(GenericClient):
         if not self._torrent_is_downloading(result):
 
             arguments = {'metainfo': b64encode(result.content),
-                         'paused': 1 if sickbeard.TORRENT_PAUSED else 0,
+                         'paused': 1,
                          'download-dir': sickbeard.TORRENT_PATH
             }
             post_data = json.dumps({'arguments': arguments,
@@ -211,6 +224,20 @@ class TransmissionAPI(GenericClient):
             is_not_downloading = True
 
         self.manage_single_episode(result, is_not_downloading)
+
+        if is_not_downloading and not sickbeard.TORRENT_PAUSED:
+
+            arguments = {'ids': [result.hash],
+                         'paused': 0
+            }
+            post_data = json.dumps({'arguments': arguments,
+                                    'method': 'torrent-set',
+            })
+            self._request(method='post', data=post_data)
+
+            if not self.response.json()['result'] == "success":
+                return False
+
 
         return True
 
