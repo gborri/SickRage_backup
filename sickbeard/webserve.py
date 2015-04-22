@@ -5098,6 +5098,10 @@ class ErrorLogs(WebRoot):
                 with ek.ek(codecs.open, *[logger.logFile + "." + str(i), 'r', 'utf-8']) as f:
                         data += Get_Data(minLevel, f.readlines(), len(data), regex, logFilter, logSearch, maxLines)
 
+        
+
+               
+
         result = "".join(data)
 
         t.logLines = result
