@@ -327,7 +327,8 @@ class TransmissionAPI(GenericClient):
 
     def remove_torrent_downloaded(self,hash):
 
-        arguments = { 'ids': [hash]
+        arguments = { 'ids': [hash],
+                      'delete-local-data': 1
                       }
         post_data = json.dumps({'arguments': arguments,
                                 'method': 'torrent-remove',
