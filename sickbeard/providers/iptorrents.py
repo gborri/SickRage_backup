@@ -60,12 +60,12 @@ class IPTorrentsProvider(generic.TorrentProvider):
 
         self.urls = {'base_url': 'https://iptorrents.eu',
                 'login': 'https://iptorrents.eu/torrents/',
-                'search': 'https://iptorrents.eu/torrents/?%s%s&q=%s&qf=ti',
+                'search': 'https://iptorrents.eu/t?%s%s&q=%s&qf=#torrents',
         }
 
         self.url = self.urls['base_url']
 
-        self.categorie = 'l73=1&l78=1&l66=1&l65=1&l79=1&l5=1&l4=1'
+        self.categorie = 'l73='
 
     def isEnabled(self):
         return self.enabled
@@ -133,6 +133,8 @@ class IPTorrentsProvider(generic.TorrentProvider):
             for show_name in set(show_name_helpers.allPossibleShowNames(self.show)):
                 ep_string = show_name_helpers.sanitizeSceneName(show_name) + ' ' + \
                             sickbeard.config.naming_ep_type[2] % {'seasonnumber': ep_obj.scene_season,
+                                                                  'episodenumber': ep_obj.scene_episode} + '|' + \
+                            sickbeard.config.naming_ep_type[0] % {'seasonnumber': ep_obj.scene_season,
                                                                   'episodenumber': ep_obj.scene_episode} + ' %s' % add_string
 
                 search_string['Episode'].append(re.sub('\s+', ' ', ep_string))
