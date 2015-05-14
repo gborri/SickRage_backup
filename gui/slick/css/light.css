@@ -1198,6 +1198,10 @@ span.snatched b {
 	text-align: left !important;
 }
 
+.displayShowTable td.col-search {
+    text-align: center;
+}
+
 .sickbeardTable {
 	table-layout: auto;
 	width: 100%;
@@ -1836,6 +1840,10 @@ span.HD {
 	background-color: #2672B6;
 }
 
+span.HDTV {
+	background-color: #2672B6;
+}
+
 span.HD720p {
 	background-color: #5b990d;
 }
@@ -1848,7 +1856,15 @@ span.RawHD {
 	background-color: #cd7300;
 }
 
+span.RawHDTV {
+	background-color: #cd7300;
+}
+
 span.SD {
+	background-color: #BE2625;
+}
+
+span.SDTV {
 	background-color: #BE2625;
 }
 
