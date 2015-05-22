@@ -161,7 +161,8 @@ class TransmissionAPI(GenericClient):
 
                 if not self.response.json()['result'] == "success":
                     self._manage_trasmission_error(result, add_arguments)
-            else
+
+            else:
 
                 arguments = {'ids': [result.hash]
                 }
