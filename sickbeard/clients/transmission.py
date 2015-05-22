@@ -145,9 +145,10 @@ class TransmissionAPI(GenericClient):
 
         if is_not_downloading:
 
-            self.remove_torrent_downloaded(result.hash)
-
             if unwantedFile:
+
+                self.remove_torrent_downloaded(result.hash)
+
                 add_arguments['files-unwanted'] = unwantedFile
                 add_arguments['paused'] = 1 if sickbeard.TORRENT_PAUSED else 0
                 add_arguments['download-dir'] = sickbeard.TORRENT_PATH
