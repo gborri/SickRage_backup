@@ -161,6 +161,20 @@ class TransmissionAPI(GenericClient):
 
                 if not self.response.json()['result'] == "success":
                     self._manage_trasmission_error(result, add_arguments)
+            else
+
+                arguments = {'ids': [result.hash]
+                }
+
+                post_data = json.dumps({'arguments': arguments,
+                            'method': 'torrent-start-now'
+                })
+
+                self._request(method='post', data=post_data)
+
+                if not self.response.json()['result'] == "success":
+                    self._manage_trasmission_error(result, arguments)
+                
 
         else:
 
@@ -171,7 +185,7 @@ class TransmissionAPI(GenericClient):
                 }
 
                 post_data = json.dumps({'arguments': arguments,
-                            'method': 'torrent-set',
+                            'method': 'torrent-set'
                 })
 
                 self._request(method='post', data=post_data)
