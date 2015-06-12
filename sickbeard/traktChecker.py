@@ -630,10 +630,8 @@ class TraktRolling():
         logger.log(u"Start getting list from Traktv", logger.DEBUG)
 
         logger.log(u"Getting EpisodeWatched", logger.DEBUG)
-        if not self._getEpisodeWatched():
-            return
-
-        self.updateWantedList()
+        if self._getEpisodeWatched():
+            self.updateWantedList()
 
     def _getEpisodeWatched(self):
 
